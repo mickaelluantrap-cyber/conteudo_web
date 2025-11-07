@@ -5,13 +5,13 @@ body{
 
 body{
 
-    background-color:black;
+    background-color:rgb(199, 84, 84);
 }
 p{
-    color:white;
+    color:purple;
 }
 article{
-    color:red ;
+    color:purple ;
 }
 
 
@@ -22,8 +22,93 @@ article{
 
 header{
     display:flex;
-    border:1px red solid;
+    border:1px purple;
 }
+
+
+header{
+display: flex
+justify-content: space-between ;
+align-items: center;
+/*border:1px red solid;*/
+paddig:12px
+}
+
+
+.artigo-v-imagem{
+    display:flex;
+    justify-content: space-evenly ;
+    align-items: center;
+}
+
+.artigo-c-imagem article{
+
+padding:12px;
+border:1px #301116 dotted;
+border-radius: 10px ;
+
+}
+
+
+.artigo-c-imagem article p{
+
+font-size: 22px;
+
+
+
+}
+
+
+
+.artigo-c-imagem{
+    display:flex;
+    justify-content:center;
+    align-items: center;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+.hobbies{
+
+    display:flex;
+    justify-content:center;
+    align-items: center;
+
+
+
+}
+
+
+
+
+.hobbies h2{
+
+    color:#30116d
+}
+
+.hobbies li{
+
+    font-size: 22px;
+}
+
+
+
+
+
+
+
+
 
 
 

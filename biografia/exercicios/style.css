@@ -1,0 +1,218 @@
+.ex1{
+
+width: 200px;
+height: 100px;
+border: 3px green solid;
+}
+
+
+.ex2{
+
+width: 150px;
+height: 150px;
+background-color: blue;
+
+}
+
+
+article{
+    font-family:arial ;
+    font-size:20px ;
+    color: red;
+
+}
+
+
+h1{
+
+text-align:center;
+color:purple;
+    
+
+
+}
+
+
+.nome{
+
+padding:25px ;
+background-color:#eeeeee;
+
+
+
+
+
+
+}
+
+
+
+.ex6{
+width: 100px;
+height: 100px;
+background-color:orange;
+
+
+
+}
+
+.ex6+{
+width: 100px;
+height: 100px;
+margin-bottom:30px;
+
+}
+
+
+.ex7{
+width: 100px;
+height: 100px;
+background-color:black;
+border-radius: 50px ;
+
+
+}
+
+
+
+#caixa-destaque{
+     width: 500px;
+     height: 50px;
+     border:cyan 2px dashed;
+
+}
+
+
+
+
+.texto-importante{
+
+font-weight: bold;
+font-size: 25px;
+color: purple;
+}
+
+
+
+a{
+
+text-decoration: none;
+color:red;
+
+
+
+
+
+}
+
+a hatch{
+
+pseudo-classe :hover;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

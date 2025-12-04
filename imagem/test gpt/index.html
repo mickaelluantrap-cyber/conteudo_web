@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jogo 3D (VS Code) - Exemplo Funcional</title>
+  <style>
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Arial}
+    #gameCanvas{display:block;width:100%;height:100vh;background:#87ceeb}
+    #ui{position:fixed;left:12px;top:12px;z-index:10;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+    #score{font-size:18px;margin-bottom:6px}
+    #message{background:rgba(0,0,0,.4);padding:8px;border-radius:6px}
+    #controls{position:fixed;right:12px;top:12px;color:#fff;background:rgba(0,0,0,.35);padding:8px;border-radius:6px}
+    button{padding:8px 12px;border-radius:6px;border:0;background:#2b8fff;color:white;cursor:pointer}
+    #footer{position:fixed;left:12px;bottom:12px;color:#fff}
+  </style>
+</head>
+<body>
+  <div id="ui">
+    <div id="score">Pontuação: <span id="scoreVal">0</span></div>
+    <div id="message">Progresso: <span id="status">Jogando</span></div>
+  </div>
+  <div id="controls">
+    <div style="margin-bottom:6px"><strong>Controles</strong></div>
+    W/A/S/D - mover | Espaço - pular | R - reiniciar</div>
+  <div id="footer">Abra este arquivo no VS Code e use a extensão Live Server ou abra no navegador. (Recomendado: Live Server)</div>
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- three.js (não-modular, CDN) -->
+  <script src="https://unpkg.com/three@0.152.2/build/three.min.js"></script>
+
+  <script>
+  // Jogo 3D simples usando Three.js
+  // Arquivo único - abra em VS Code e rode com Live Server
+
+  // --- Configurações e inicialização ---
+  const canvas = document.getElementById('gameCanvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0x87ceeb, 20, 120);
+
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 500);
+  camera.position.set(0, 6, 12);
+
+  // --- Lighting ---
+  const hemi = new THREE.HemisphereLight(0xffffff, 0x444466, 0.9);
+  hemi.position.set(0, 50, 0);
+  scene.add(hemi);
+
+  const sun = new THREE.DirectionalLight(0xffffff, 0.8);
+  sun.position.set(10, 20, 10);
+  sun.castShadow = true;
+  sun.shadow.mapSize.width = 1024;
+  sun.shadow.mapSize.height = 1024;
+  sun.shadow.camera.left = -50; sun.shadow.camera.right = 50; sun.shadow.camera.top = 50; sun.shadow.camera.bottom = -50;
+  scene.add(sun);
+
+  // --- Ground ---
+  const groundGeo = new THREE.PlaneGeometry(200, 200);
+  const groundMat = new THREE.MeshStandardMaterial({ color: 0x228B22 });
+  const ground = new THREE.Mesh(groundGeo, groundMat);
+  ground.rotation.x = -Math.PI/2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  // --- Player ---
+  const player = new THREE.Mesh(
+    new THREE.BoxGeometry(1,1.8,1),
+    new THREE.MeshStandardMaterial({ color: 0x2020ff })
+  );
+  player.castShadow = true;
+  player.position.set(0,1,0);
+  scene.add(player);
+
+  // Player physics
+  const state = {
+    vel: new THREE.Vector3(0,0,0),
+    onGround: false,
+    speed: 8,
+    jumpSpeed: 8
+  };
+
+  // --- Camera follow settings ---
+  const camOffset = new THREE.Vector3(0,4,10);
+
+  // --- Coins ---
+  const coins = [];
+  const coinGeo = new THREE.SphereGeometry(0.35, 12, 12);
+  const coinMat = new THREE.MeshStandardMaterial({ emissive:0xffd700, metalness:0.6, roughness:0.3 });
+
+  function spawnCoin(x,z){
+    const m = new THREE.Mesh(coinGeo, coinMat.clone());
+    m.position.set(x, 0.6, z);
+    m.userData.collected = false;
+    m.castShadow = true;
+    scene.add(m);
+    coins.push(m);
+  }
+
+  // spawn coins in a grid
+  for(let i=0;i<15;i++){
+    const x = (Math.random()-0.5)*60;
+    const z = -i*4 - 4;
+    spawnCoin(x,z);
+  }
+
+  // --- Enemies (patrols) ---
+  const enemies = [];
+  const enemyGeo = new THREE.BoxGeometry(1.2,1.2,1.2);
+  const enemyMat = new THREE.MeshStandardMaterial({ color:0xff3333 });
+
+  function spawnEnemy(x,z,range=4,speed=1.5){
+    const e = new THREE.Mesh(enemyGeo, enemyMat.clone());
+    e.position.set(x,0.6,z);
+    e.userData = {baseX:x,range,speed,dir:1};
+    e.castShadow = true;
+    scene.add(e);
+    enemies.push(e);
+  }
+
+  spawnEnemy(6, -10, 6, 2.2);
+  spawnEnemy(-8, -24, 4, 1.4);
+  spawnEnemy(0, -40, 8, 2.6);
+
+  // --- HUD values ---
+  let score = 0;
+  const scoreVal = document.getElementById('scoreVal');
+  const statusEl = document.getElementById('status');
+
+  // --- Controls ---
+  const keys = {};
+  window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if(e.key.toLowerCase()==='r') init(); });
+  window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+  // --- Sound (beep) ---
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  function beep(freq, duration=0.06){
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'sine'; o.frequency.value = freq;
+    g.gain.value = 0.0001;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime+0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime+duration);
+    setTimeout(()=>{ o.stop(); }, duration*1000+30);
+  }
+
+  // --- Collision helpers ---
+  function dist2(a,b){ return (a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y)+(a.z-b.z)*(a.z-b.z); }
+
+  // --- Game reset / init ---
+  function init(){
+    // reset player
+    player.position.set(0,1,0);
+    state.vel.set(0,0,0);
+    state.onGround = false;
+
+    // reset coins
+    for(const c of coins){ c.userData.collected=false; c.visible = true; }
+    // reset enemies positions
+    enemies.forEach((e,i)=>{ e.position.set(e.userData.baseX,0.6,-(i+1)*12); e.userData.dir=1; });
+
+    score = 0; scoreVal.innerText = score; statusEl.innerText = 'Jogando';
+  }
+
+  init();
+
+  // --- Resize handler ---
+  window.addEventListener('resize', ()=>{
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+  });
+
+  // --- Main loop ---
+  let last = performance.now();
+  function loop(now){
+    const dt = Math.min(0.05, (now - last) / 1000); // cap dt
+    last = now;
+
+    // --- Input -> movement ---
+    const forward = (keys['w']?1:0) - (keys['s']?1:0);
+    const strafe = (keys['d']?1:0) - (keys['a']?1:0);
+
+    // simple acceleration
+    const dir = new THREE.Vector3(strafe,0,forward).normalize();
+    if(dir.length()>0){
+      state.vel.x = THREE.MathUtils.lerp(state.vel.x, dir.x * state.speed, 10*dt);
+      state.vel.z = THREE.MathUtils.lerp(state.vel.z, dir.z * state.speed, 10*dt);
+    } else {
+      state.vel.x = THREE.MathUtils.lerp(state.vel.x, 0, 8*dt);
+      state.vel.z = THREE.MathUtils.lerp(state.vel.z, 0, 8*dt);
+    }
+
+    // gravity
+    state.vel.y -= 20 * dt;
+
+    // jump
+    if(keys[' ']){
+      if(state.onGround){ state.vel.y = state.jumpSpeed; state.onGround=false; beep(520,0.08); }
+    }
+
+    // integrate
+    player.position.addScaledVector(state.vel, dt);
+
+    // ground collision
+    if(player.position.y <= 1){ player.position.y = 1; state.vel.y = 0; state.onGround = true; }
+
+    // --- Camera follow ---
+    const desiredCam = new THREE.Vector3().copy(player.position).add(camOffset);
+    camera.position.lerp(desiredCam, 6*dt);
+    camera.lookAt(player.position.x, player.position.y+1, player.position.z);
+
+    // --- Coin detection ---
+    for(const c of coins){
+      if(c.userData.collected) continue;
+      const d = player.position.distanceTo(c.position);
+      if(d < 1.2){
+        c.userData.collected = true; c.visible = false; score += 10; scoreVal.innerText = score; beep(880,0.06);
+      } else {
+        // small float animation
+        c.rotation.y += 1.5*dt;
+        c.position.y = 0.6 + Math.sin(now/400 + c.id) * 0.12;
+      }
+    }
+
+    // --- Enemy AI (patrol) ---
+    enemies.forEach(e=>{
+      e.position.x += e.userData.dir * e.userData.speed * dt;
+      if(Math.abs(e.position.x - e.userData.baseX) > e.userData.range){ e.userData.dir *= -1; }
+
+      // collision with player
+      if(player.position.distanceTo(e.position) < 1.2){
+        statusEl.innerText = 'Derrotado! Aperte R para reiniciar.'; beep(120,0.2);
+        // freeze movement
+        state.vel.set(0,0,0);
+        state.speed = 0;
+      }
+    });
+
+    // --- Win condition (collect all coins) ---
+    const remaining = coins.filter(c=>!c.userData.collected).length;
+    if(remaining === 0){ statusEl.innerText = 'Você venceu! Recolheu todas as moedas.'; }
+
+    renderer.render(scene, camera);
+    requestAnimationFrame(loop);
+  }
+
+  requestAnimationFrame(loop);
+
+  // --- Extras: small helper to label coins with ids for animations ---
+  coins.forEach((c,i)=>{ c.id = i; });
+
+  </script>
+</body>
+</html>

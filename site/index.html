@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Monitoramento Industrial</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>🏭 Monitoramento de Produção</h1>
+    </header>
+
+    <main class="dashboard">
+
+        <section class="secao-processos">
+            <h2>⚙️ Processos e Estações</h2>
+            <div class="cartao-processo" id="processo-bancada">
+                <h3>Bancada</h3>
+                <div class="status-indicator trabalhando" id="status-bancada">Trabalhando</div>
+            </div>
+            <div class="cartao-processo" id="processo-montagem">
+                <h3>Montagem</h3>
+                <div class="status-indicator ocioso" id="status-montagem">Ocioso</div>
+            </div>
+            <div class="cartao-processo" id="processo-expedicao">
+                <h3>Expedição</h3>
+                <div class="status-indicator trabalhando" id="status-expedicao">Trabalhando</div>
+            </div>
+        </section>
+        
+        <section class="secao-dados">
+            <h2>📊 Dados de Sensores</h2>
+            <div class="grid-dados">
+                <div class="cartao-dado">
+                    <h4>Temperatura</h4>
+                    <p id="dado-temperatura">25.5 °C</p>
+                </div>
+                <div class="cartao-dado">
+                    <h4>Umidade</h4>
+                    <p id="dado-umidade">60 %</p>
+                </div>
+                <div class="cartao-dado">
+                    <h4>Tensão</h4>
+                    <p id="dado-tensao">220.3 V</p>
+                </div>
+                <div class="cartao-dado">
+                    <h4>Corrente</h4>
+                    <p id="dado-corrente">10.5 A</p>
+                </div>
+            </div>
+        </section>
+
+<section class="secao-estoque">
+            <h2>📦 Posições de Estoque (28 posições)</h2>
+            <div class="grid-posicoes">
+                <div class="posicao vermelho">R1</div>
+                <div class="posicao azul">A1</div>
+                <div class="posicao preto">P1</div>
+                <div class="posicao vazio">Vazio</div>
+                <div class="posicao azul">A2</div>
+                <div class="posicao vermelho">R2</div>
+                <div class="posicao preto">P2</div>
+                
+                <div class="posicao azul">A3</div>
+                <div class="posicao vazio">Vazio</div>
+                <div class="posicao vermelho">R3</div>
+                <div class="posicao azul">A4</div>
+                <div class="posicao preto">P3</div>
+                <div class="posicao vazio">Vazio</div>
+                <div class="posicao vermelho">R4</div>
+
+                <div class="posicao vazio">Vazio</div>
+                <div class="posicao preto">P4</div>
+                <div class="posicao azul">A5</div>
+                <div class="posicao vermelho">R5</div>
+                <div class="posicao vazio">Vazio</div>
+                <div class="posicao azul">A6</div>
+                <div class="posicao preto">P5</div>
+
+                <div class="posicao vermelho">R6</div>
+                <div class="posicao azul">A7</div>
+                <div class="posicao vazio">Vazio</div>
+                <div class="posicao preto">P6</div>
+                <div class="posicao vermelho">R7</div>
+                <div class="posicao azul">A8</div>
+                <div class="posicao vazio">Vazio</div>
+
+            </div>
+        </section>
+        ```
+
+---
+     
+        <section class="secao-expedicao">
+            <h2>🚚 Expedição (12 Posições)</h2>
+            <div class="grid-posicoes expedicao-grid">
+                <div class="posicao pedido">#1001</div>
+                <div class="posicao pedido">#1002</div>
+                <div class="posicao vazio">Vazio</div>
+                <div class="posicao pedido">#1003</div>
+                <div class="posicao vazio">Vazio</div>
+                <div class="posicao pedido">#1004</div>
+                <div class="posicao pedido">#1005</div>
+                <div class="posicao vazio">Vazio</div>
+                <div class="posicao pedido">#1006</div>
+                <div class="posicao vazio">Vazio</div>
+                <div class="posicao pedido">#1007</div>
+                <div class="posicao pedido">#1008</div>
+            </div>
+        </section>
+
+        <section class="secao-pedidos">
+            <h2>📝 Pedidos em Andamento</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>N° Pedido</th>
+                        <th>Status Atual</th>
+                        <th>Localização</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-pedidos">
+                    <tr><td>#1001</td><td>Em Expedição</td><td>Posição 1</td></tr>
+                    <tr class="destaque-pedido"><td>**#1009**</td><td>**Em Processo**</td><td>**Bancada**</td></tr>
+                    <tr><td>#1010</td><td>Aguardando</td><td>Estoque</td></tr>
+                    <tr><td>#1011</td><td>Em Montagem</td><td>Montagem</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>

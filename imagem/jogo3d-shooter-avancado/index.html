@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Night Guard — Versão Avançada (VS Code)</title>
+<style>
+  :root{--bg:#07060a;--panel:#0f1620;--accent:#ffcc33}
+  html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:Inter,system-ui,Arial}
+  .wrap{max-width:1200px;margin:18px auto;padding:12px}
+  h1{margin:0 0 8px}
+  #game{width:100%;height:720px;background:#000;border-radius:10px;overflow:hidden;display:grid;grid-template-columns:360px 1fr;gap:12px}
+  .left{padding:12px;background:linear-gradient(180deg,#0b0f16,#071121);display:flex;flex-direction:column}
+  .right{position:relative;overflow:hidden}
+  canvas#view{display:block;background:#060709;border-radius:6px;width:100%;height:100%}
+  .panel{background:rgba(255,255,255,0.03);padding:10px;border-radius:8px;margin-bottom:10px}
+  button{background:#111;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:8px;color:#fff;cursor:pointer}
+  .bigbtn{padding:12px 16px;font-weight:700}
+  .status{font-family:monospace}
+  .cams{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .map{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .map .room{background:#081219;padding:8px;border-radius:6px;text-align:center;cursor:pointer}
+  .logs{height:120px;overflow:auto;background:#07101a;padding:8px;border-radius:6px}
+  .menu{display:flex;gap:8px;margin-bottom:8px}
+  .topbar{display:flex;justify-content:space-between;align-items:center}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Night Guard — Versão Avançada</h1>
+    <p>Recursos: sons (passos, jump-scare), logs de câmeras, mapa interativo, múltiplas noites com dificuldade crescente, IA melhorada.</p>
+
+    <div class="topbar">
+      <div style="color:#ccc">Dica: abra o console do navegador (F12) para debug de logs.</div>
+      <div><button id="btnHelp">Ajuda</button></div>
+    </div>
+
+    <div id="game">
+      <div class="left">
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between"><div>Tempo restante:</div><div class="status" id="time">60</div></div>
+          <div style="display:flex;justify-content:space-between"><div>Energia:</div><div class="status" id="power">100%</div></div>
+          <div style="display:flex;justify-content:space-between"><div>Noite:</div><div class="status" id="nightName">1</div></div>
+        </div>
+
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><strong>Câmeras</strong><span class="status" id="camName">Cam 1</span></div>
+          <div class="cams" id="camButtons"></div>
+        </div>
+
+        <div class="panel">
+          <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+            <div class="door"><button id="leftDoor">Fechar Esquerda</button><div class="status" id="leftDoorStatus">Aberta</div></div>
+            <div class="door"><button id="rightDoor">Fechar Direita</button><div class="status" id="rightDoorStatus">Aberta</div></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center"><button id="hallLight">Luz do Corredor</button><div class="status" id="lightStatus">Off</div></div>
+        </div>
+
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between"><strong>Mapa Interativo</strong><button id="btnToggleMap">Mostrar/Ocultar</button></div>
+          <div id="mapWrap" style="display:none;margin-top:8px">
+            <div class="map" id="mapGrid"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between"><strong>Logs das Câmeras</strong><button id="clearLogs">Limpar</button></div>
+          <div class="logs" id="logs"></div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:auto">
+          <div class="menu">
+            <label>Noite:</label>
+            <select id="nightSelect"><option value="1">Noite 1</option><option value="2">Noite 2</option><option value="3">Noite 3</option><option value="4">Noite 4</option><option value="5">Noite 5</option></select>
+          </div>
+          <div style="display:flex;gap:6px"><button id="btnStart" class="bigbtn">Iniciar Noite</button><button id="btnRestart">Reiniciar</button></div>
+        </div>
+
+      </div>
+
+      <div class="right">
+        <canvas id="view" width="760" height="720"></canvas>
+      </div>
+    </div>
+  </div>
+
+<script>
+/*
+  Night Guard — Versão Avançada
+  - Sons: WebAudio synth + small samples (steps, jumpscare, door)
+  - Logs: registro de eventos por câmera
+  - Mapa: clique nas salas para abrir a câmera e ver últimos eventos
+  - Múltiplas noites: 1..5 com aumento de agressividade e tempo reduzido
+  - IA: animatrônicos com rotas, teleporte e estratégias
+*/
+
+// ---- Audio (WebAudio) ----
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+const audioCtx = new AudioCtx();
+let masterGain = audioCtx.createGain(); masterGain.gain.value = 0.9; masterGain.connect(audioCtx.destination);
+
+function playBeep(freq, time=0.06, type='sine', vol=0.12){
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = type; o.frequency.value = freq; g.gain.value = vol;
+  o.connect(g); g.connect(masterGain);
+  o.start(); o.stop(audioCtx.currentTime + time);
+}
+
+// footsteps (short sequence)
+function playFootstep(){ playBeep(220, 0.05, 'sawtooth', 0.04); }
+
+// door sound
+function playDoor(){ playBeep(120, 0.12, 'triangle', 0.08); }
+
+// jump-scare: layered tones + noise
+function playJumpScare(){
+  // loud blast
+  const o1 = audioCtx.createOscillator(); const g1 = audioCtx.createGain(); o1.type='sawtooth'; o1.frequency.value = 80; g1.gain.value = 1.2; o1.connect(g1); g1.connect(masterGain);
+  const o2 = audioCtx.createOscillator(); const g2 = audioCtx.createGain(); o2.type='square'; o2.frequency.value = 400; g2.gain.value = 0.9; o2.connect(g2); g2.connect(masterGain);
+  o1.start(); o2.start();
+  setTimeout(()=>{ o1.stop(); o2.stop(); }, 600);
+}
+
+// tiny sample fallback (click) for systems where WebAudio is suspended until user gesture
+function resumeAudio(){ if(audioCtx.state === 'suspended') audioCtx.resume(); }
+
+// ---- Game state ----
+let running = false;
+let nightTime = 60; // seconds
+let power = 100; // percent
+let currentCam = 1;
+let leftDoorClosed = false, rightDoorClosed = false, hallLightOn = false;
+let currentNight = 1; // 1..5
+let gameState = 'idle';
+
+// cameras layout (rooms 1..8)
+const CAMS = 8;
+const camNames = ['Entrada','Sala A','Sala B','Sala C','Sala D','Hall','Corredor','Câmara']
+
+// logs per camera
+const camLogs = Array.from({length:CAMS}, ()=>[]);
+function logCam(cam, text){ const t = new Date().toLocaleTimeString(); camLogs[cam-1].unshift(`[${t}] ${text}`); // keep short
+  if(camLogs[cam-1].length>50) camLogs[cam-1].pop(); updateLogsUI(); }
+
+function updateLogsUI(){ const el = document.getElementById('logs'); el.innerHTML = '';
+  const logs = camLogs[currentCam-1]; logs.forEach(l=>{ const d=document.createElement('div'); d.textContent = l; el.appendChild(d); }); }
+
+// map UI
+const mapGrid = document.getElementById('mapGrid');
+for(let i=1;i<=CAMS;i++){ const div=document.createElement('div'); div.className='room'; div.textContent = i + '\n' + camNames[i-1]; div.dataset.cam=i; div.addEventListener('click', ()=>{ switchCam(Number(div.dataset.cam)); showMap(false); }); mapGrid.appendChild(div); }
+
+function showMap(show){ document.getElementById('mapWrap').style.display = show? 'block':'none'; }
+
+// enemies (animatronics) with improved AI
+let enemies = [
+  {id:0,name:'Astra',room:1,pos:0,aggr:0,route:[1,2,3,6,7],speed:0.6,teleChance:0.001},
+  {id:1,name:'Bolt',room:2,pos:0,aggr:0,route:[2,4,5,6,7],speed:0.5,teleChance:0.0008},
+  {id:2,name:'Corvo',room:3,pos:0,aggr:0,route:[3,5,6,8,7],speed:0.7,teleChance:0.0012}
+];
+
+// difficulty by night: [time, aggressionMultiplier, teleChanceMultiplier]
+const NIGHT_CONFIG = {
+  1: {time:60, aggr:1, tele:1},
+  2: {time:60, aggr:1.2, tele:1.1},
+  3: {time:50, aggr:1.4, tele:1.2},
+  4: {time:45, aggr:1.6, tele:1.3},
+  5: {time:40, aggr:1.9, tele:1.5}
+};
+
+// UI refs
+const timeEl = document.getElementById('time'), powerEl = document.getElementById('power'), camNameEl = document.getElementById('camName');
+const leftDoorStatus = document.getElementById('leftDoorStatus'), rightDoorStatus = document.getElementById('rightDoorStatus'), lightStatus = document.getElementById('lightStatus');
+const nightNameEl = document.getElementById('nightName');
+
+// canvas
+const view = document.getElementById('view'); const ctx = view.getContext('2d');
+
+// controls
+document.getElementById('btnStart').addEventListener('click', ()=>{ currentNight = Number(document.getElementById('nightSelect').value); startNight(currentNight); resumeAudio(); });
+document.getElementById('btnRestart').addEventListener('click', resetGame);
+document.getElementById('btnToggleMap').addEventListener('click', ()=> showMap(document.getElementById('mapWrap').style.display==='none'));
+document.getElementById('clearLogs').addEventListener('click', ()=>{ camLogs.forEach(a=>a.length=0); updateLogsUI(); });
+document.getElementById('btnHelp').addEventListener('click', ()=> alert('Controles:\n- Botões das câmeras para mudar visão\n- Fechar portas e ligar luz para defender\n- Sobreviva até o tempo acabar\nDica: clique uma vez na tela para ativar sons.'));
+
+// camera buttons
+const camButtonsWrap = document.getElementById('camButtons');
+for(let i=1;i<=CAMS;i++){ const b = document.createElement('button'); b.textContent = i; b.dataset.cam=i; b.addEventListener('click', ()=> switchCam(Number(b.dataset.cam))); camButtonsWrap.appendChild(b); }
+
+// door/light toggles
+document.getElementById('leftDoor').addEventListener('click', ()=>{ leftDoorClosed = !leftDoorClosed; leftDoorStatus.textContent = leftDoorClosed? 'Fechada':'Aberta'; playDoor(); drainPower(1.6); logCam(currentCam, 'Operador: ' + (leftDoorClosed? 'Fechou porta esquerda':'Abriu porta esquerda')); });
+document.getElementById('rightDoor').addEventListener('click', ()=>{ rightDoorClosed = !rightDoorClosed; rightDoorStatus.textContent = rightDoorClosed? 'Fechada':'Aberta'; playDoor(); drainPower(1.6); logCam(currentCam, 'Operador: ' + (rightDoorClosed? 'Fechou porta direita':'Abriu porta direita')); });
+document.getElementById('hallLight').addEventListener('click', ()=>{ hallLightOn = !hallLightOn; lightStatus.textContent = hallLightOn? 'Ligada':'Off'; logCam(currentCam, 'Operador: ' + (hallLightOn? 'Ligou luz do corredor':'Apagou luz do corredor')); drainPower(0.8); });
+
+// game loop
+let lastTick = performance.now(); let raf = null;
+function startNight(n){ resetGame(); currentNight = n; const cfg = NIGHT_CONFIG[n]; nightTime = cfg.time; gameState='playing'; nightNameEl.textContent = 'Noite ' + n; // initialize enemies with difficulty
+  enemies.forEach((e, idx)=>{ e.pos = 0; e.room = e.route[0]; e.aggr = 0.01 * idx; e.speedBase = e.speed; e.speed = e.speedBase * cfg.aggr; e.teleChanceCurr = e.teleChance * cfg.tele; e.active = true; });
+  running = true; lastTick = performance.now(); raf = requestAnimationFrame(loop);
+}
+
+function resetGame(){ running=false; gameState='idle'; leftDoorClosed=false; rightDoorClosed=false; hallLightOn=false; power=100; nightTime=60; currentCam=1; updateUI(); logAll('Sistema','Jogo reiniciado'); if(raf){ cancelAnimationFrame(raf); raf=null;} draw(); }
+
+function drainPower(amount){ power -= amount; if(power<0) power = 0; }
+
+function switchCam(n){ currentCam = n; camNameEl.textContent = 'Cam ' + n + ' - ' + (camNames[n-1]||''); logCam(n, 'Visualizado'); drainPower(0.06); }
+
+function logAll(camText, text){ // push to all cams as system message
+  for(let i=1;i<=CAMS;i++) camLogs[i-1].unshift(`[${new Date().toLocaleTimeString()}] ${camText}: ${text}`);
+  updateLogsUI(); }
+
+function updateUI(){ timeEl.textContent = Math.ceil(nightTime); powerEl.textContent = Math.max(0,Math.floor(power)) + '%'; leftDoorStatus.textContent = leftDoorClosed? 'Fechada':'Aberta'; rightDoorStatus.textContent = rightDoorClosed? 'Fechada':'Aberta'; lightStatus.textContent = hallLightOn? 'Ligada':'Off'; }
+
+function loop(now){ const dt = (now - lastTick)/1000; lastTick = now; if(!running){ draw(); return; }
+  // time and passive drain
+  nightTime -= dt; drainPower(0.02 * dt * 60);
+  if(leftDoorClosed) drainPower(0.03 * dt * 60);
+  if(rightDoorClosed) drainPower(0.03 * dt * 60);
+  if(hallLightOn) drainPower(0.015 * dt * 60);
+
+  // enemies AI
+  enemies.forEach((e, i)=>{
+    if(!e.active) return;
+    // aggression growth influenced by night
+    e.aggr += (0.0007 + Math.random()*0.0012) * (currentNight * 0.9) * dt * 60;
+
+    // random teleport possibility
+    if(Math.random() < e.teleChanceCurr * dt * 60){
+      // teleport to random route node (simulate jumps between cameras)
+      const choice = e.route[Math.floor(Math.random()*e.route.length)];
+      e.room = choice;
+      logCam(e.room, e.name + ' apareceu (teleporte)');
+      playFootstep();
+    }
+
+    // move along route probabilistically
+    if(Math.random() < (0.002 + e.aggr*0.003) * dt * 60){
+      // advance in route array
+      const idx = e.route.indexOf(e.room);
+      const next = e.route[(idx + 1) % e.route.length];
+      e.room = next;
+      logCam(e.room, e.name + ' movendo-se para sala ' + e.room);
+      playFootstep();
+    }
+
+    // if enemy is at the office (7==office), they try to attack
+    const atOffice = (e.room === 7);
+    if(atOffice){
+      // pick side depending on enemy id to diversify
+      const side = (i%2===0)? 'left' : 'right';
+      const doorClosed = (side==='left')? leftDoorClosed : rightDoorClosed;
+
+      // hall light reduces attack chance and may push them back
+      if(hallLightOn && Math.random() < 0.6){ e.room = e.route[0]; logCam(currentCam, e.name + ' recuou por luz'); }
+      else if(!doorClosed){ // attempt attack
+        // small delay -> jump-scare
+        logCam(currentCam, e.name + ' invadiu pela ' + side);
+        // trigger jumpscare after short delay
+        setTimeout(()=>{ triggerJumpScare(e); }, 500 + Math.random()*600);
+      } else {
+        // door blocks, they may wait and lose aggression
+        e.aggr *= 0.85;
+      }
+    }
+
+  });
+
+  // power failure consequences
+  if(power <= 0){ leftDoorClosed=false; rightDoorClosed=false; hallLightOn=false; logAll('Sistema','Energia esgotada - sistemas offline'); }
+
+  // win/lose
+  if(nightTime <= 0){ win(); return; }
+
+  updateUI(); draw(); raf = requestAnimationFrame(loop);
+}
+
+function win(){ running=false; gameState='won'; logAll('Sistema','Noite completada!'); alert('Você sobreviveu!'); }
+
+function lose(){ running=false; gameState='lost'; logAll('Sistema','Você foi pego'); playJumpScare(); alert('Game Over — Você foi pego'); }
+
+function triggerJumpScare(enemy){ // play sound + visual and end
+  playJumpScare(); drawJumpScare(enemy.name);
+  setTimeout(()=>{ lose(); }, 700);
+}
+
+// ---- Drawing ----
+function draw(){ // camera view stylized
+  ctx.clearRect(0,0,view.width,view.height);
+  // backdrop
+  ctx.fillStyle = '#061019'; ctx.fillRect(0,0,view.width,view.height);
+  // office desk
+  ctx.fillStyle = '#0b2a36'; roundedRect(120,380,520,180,10);
+  ctx.fillStyle = '#09222a'; roundedRect(100,60,560,300,8);
+
+  // draw animatronics present in currentCam
+  enemies.forEach((e,i)=>{
+    if(e.room === currentCam){
+      const x = (i%2===0)? 140+(i*60) : view.width - 200 - (i*40);
+      const y = 120 + (i*30);
+      drawSilhouette(x,y,i);
+    }
+  });
+
+  // doors
+  ctx.fillStyle = leftDoorClosed? '#071820' : '#13303d'; roundedRect(20,150,80,360,6);
+  ctx.fillStyle = rightDoorClosed? '#071820' : '#13303d'; roundedRect(view.width - 100,150,80,360,6);
+
+  // hall light overlay
+  if(hallLightOn){ ctx.fillStyle = 'rgba(255,255,210,0.08)'; ctx.fillRect(150,40,view.width-300,view.height-100); }
+
+  // HUD small
+  ctx.fillStyle = '#cfe'; ctx.font='18px monospace'; ctx.fillText('Cam ' + currentCam + ' - ' + (camNames[currentCam-1]||''), 14, 24);
+}
+
+function drawSilhouette(x,y,i){ ctx.save(); ctx.translate(x,y); ctx.fillStyle = 'rgba(0,0,0,0.95)'; ctx.beginPath(); ctx.ellipse(0,0,44,62,0,0,Math.PI*2); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,0.96)'; ctx.fillRect(-16,-14,10,10); ctx.fillRect(8,-14,10,10); ctx.restore(); }
+
+function drawJumpScare(name){ ctx.clearRect(0,0,view.width,view.height); ctx.fillStyle='#fff'; ctx.fillRect(0,0,view.width,view.height); ctx.fillStyle='#000'; ctx.font='48px monospace'; ctx.fillText(name + '!', view.width/2 - 90, view.height/2); }
+
+function roundedRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); ctx.fill(); }
+
+// ---- Utilities ----
+function playFootstep(){ resumeAudio(); playBeep(220, 0.05, 'sawtooth', 0.04); }
+function playDoor(){ resumeAudio(); playBeep(120, 0.12, 'triangle', 0.08); }
+function playJumpScare(){ resumeAudio(); // layered loud
+  const o1 = audioCtx.createOscillator(); const g1 = audioCtx.createGain(); o1.type='sawtooth'; o1.frequency.value = 90; g1.gain.value = 1.4; o1.connect(g1); g1.connect(masterGain);
+  const o2 = audioCtx.createOscillator(); const g2 = audioCtx.createGain(); o2.type='square'; o2.frequency.value = 520; g2.gain.value = 1.0; o2.connect(g2); g2.connect(masterGain);
+  o1.start(); o2.start(); setTimeout(()=>{ o1.stop(); o2.stop(); }, 700);
+}
+
+// small wrapper
+function playBeep(freq, time=0.06, type='sine', vol=0.08){ const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type=type; o.frequency.value=freq; g.gain.value=vol; o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime + time); }
+
+function updateLogsUI(){ const el=document.getElementById('logs'); el.innerHTML=''; camLogs[currentCam-1].forEach(l=>{ const d=document.createElement('div'); d.textContent=l; el.appendChild(d); }); }
+
+function logCam(cam,text){ camLogs[cam-1].unshift(`[${new Date().toLocaleTimeString()}] ${text}`); if(camLogs[cam-1].length>80) camLogs[cam-1].pop(); updateLogsUI(); }
+
+// draw initial
+resetGame(); draw();
+
+</script>
+</body>
+</html>

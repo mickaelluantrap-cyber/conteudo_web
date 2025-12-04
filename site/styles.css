@@ -1,0 +1,191 @@
+/* 1. Cores Padrão (Boas Práticas de UI) */
+:root {
+    --fundo: #121212;
+    --superficie: #1e1e1e;
+    --fonte: #F5F5F5;
+    --primaria: #9d9aa1; /* Azul - OK/Principal */
+    --segundaria: #03DAC6; /* Verde - Trabalhando */
+    --destaque: #ffc107; /* Vermelho - Ocioso/Alerta */
+    --cor-vermelho: #E74C3C;
+    --cor-azul: #3498DB;
+    --cor-preto: #2C3E50;
+    --cor-vazio: #BDC3C7; /* Cinza claro */
+    --sombra-leve: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 2. Estilos Globais */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--fundo);
+    color: var(--fonte);
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: var(--primaria);
+    color: var(--superficie);
+    padding: 20px;
+    text-align: center;
+    box-shadow: var(--sombra-leve);
+}
+
+h2 {
+    color: var(--primaria);
+    border-bottom: 2px solid var(--primaria);
+    padding-bottom: 5px;
+    margin-top: 30px;
+}
+
+/* 3. Layout Principal (Dashboard) */
+.dashboard {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+/* 4. Estilos de Cartão */
+section {
+    background-color: var(--superficie);
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: var(--sombra-leve);
+}
+
+/* 5. Processos e Status */
+.secao-processos {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+}
+
+.cartao-processo {
+    flex: 1;
+    text-align: center;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 6px;
+}
+
+.status-indicator {
+    padding: 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    color: var(--superficie);
+    margin-top: 10px;
+}
+
+.trabalhando {
+    background-color: var(--segundaria); /* Verde */
+}
+
+.ocioso {
+    background-color: var(--destaque); /* Vermelho */
+}
+
+/* 6. Dados de Sensores */
+.grid-dados {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.cartao-dado {
+    text-align: center;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+.cartao-dado h4 {
+    margin: 0 0 10px 0;
+    color: var(--primaria);
+}
+
+.cartao-dado p {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 0;
+}
+
+/* 7. Estoque e Expedição (Posições) */
+.grid-posicoes {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 colunas para 28 posições no estoque */
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.expedicao-grid {
+    grid-template-columns: repeat(6, 1fr); /* 6 colunas para 12 posições na expedição */
+}
+
+.posicao {
+    padding: 10px 5px;
+    text-align: center;
+    border-radius: 4px;
+    font-weight: bold;
+    color: var(--superficie);
+    transition: transform 0.2s;
+}
+
+.posicao:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Cores do Estoque */
+.vermelho { background-color: var(--cor-vermelho); }
+.azul { background-color: var(--cor-azul); }
+.preto { background-color: var(--cor-preto); }
+.vazio { 
+    background-color: var(--cor-vazio); 
+    color: var(--fonte);
+}
+.pedido { background-color: var(--primaria); } /* Pedidos na Expedição */
+
+/* 8. Tabela de Pedidos */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: var(--fundo);
+    font-weight: bold;
+    color: var(--primaria);
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+.destaque-pedido {
+    background-color: #FEF9E7; /* Fundo amarelo claro para destaque */
+    font-weight: bold;
+    color: var(--destaque);
+}
+
+/* 9. Media Query (Responsividade) */
+@media (max-width: 768px) {
+    .secao-processos {
+        flex-direction: column;
+    }
+    .grid-dados {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .grid-posicoes {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    .expedicao-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}

@@ -1,17 +1,28 @@
-/* Paleta de Cores e Fontes (MANTIDAS) */
+/* =================================
+ * PRODFLOW | ESTILOS PRINCIPAIS (Polido)
+ * ================================= */
+
+/* ---------------------------------
+    ROOT & RESET
+--------------------------------- */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Poppins', sans-serif; 
 }
 
 :root {
+    /* Cores de Ação e Interface */
     --primary-blue: #3498db; 
+    --primary-blue-hover: #2980b9; 
     --primary-dark: #2c3e50; 
     --secondary-gray: #7f8c8d; 
+    
+    /* Cores de Fundo (Padrão: Claro) */
     --background-color: #ecf0f1; 
     --card-background: #ffffff;
+    --input-background: #f7f9fb; 
     --shadow-soft: 0 6px 15px rgba(0, 0, 0, 0.08); 
     --border-light: 1px solid #dcdde1; 
     
@@ -22,23 +33,44 @@
     --status-danger: #e74c3c; 
     --status-secondary: #95a5a6; 
 
-    /* Cores da Base */
+    /* Cores da Base do Módulo */
     --base-blue: #3498db;
     --base-black: #34495e;
     --base-red: #e74c3c;
+    --base-empty: #f0f0f0; 
+    
+    /* Transições globais */
+    --transition-fast: 0.2s ease;
+    --transition-medium: 0.4s ease;
 }
 
 body {
     background-color: var(--background-color);
-    color: #34495e; 
+    color: var(--primary-dark); 
     line-height: 1.6;
+    min-height: 100vh;
+    transition: background-color var(--transition-medium), color var(--transition-medium);
+}
+
+/* Utilitário para acessibilidade: Oculta visualmente, mas mantém legível para leitores de tela */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
 }
 
 /* Utilitário para ocultar/mostrar elementos */
 .hidden { display: none !important; }
 
+
 /* ---------------------------------
-   1. LOGIN / CADASTRO ESTILOS
+    1. LOGIN / CADASTRO ESTILOS
 --------------------------------- */
 #login-page {
     background: var(--primary-dark);
@@ -60,20 +92,22 @@ body {
     border-radius: 10px;
     box-shadow: var(--shadow-soft);
     text-align: center;
+    transition: background-color var(--transition-medium), box-shadow var(--transition-medium);
 }
-
 .login-card .logo {
     color: var(--primary-dark);
     font-size: 1.8rem;
     padding: 0;
     margin-bottom: 25px;
+    transition: color var(--transition-medium);
 }
 
 .login-card h2 {
     font-size: 1.5rem;
-    font-weight: 300;
+    font-weight: 400; 
     margin-bottom: 30px;
     color: var(--primary-dark);
+    transition: color var(--transition-medium);
 }
 
 .switch-form-text {
@@ -85,15 +119,23 @@ body {
     color: var(--primary-blue);
     text-decoration: none;
     font-weight: 500;
+    transition: color var(--transition-fast);
 }
-.switch-form-text a:hover { text-decoration: underline; }
+.switch-form-text a:hover,
+.switch-form-text a:focus { /* Foco para acessibilidade */
+    text-decoration: underline; 
+    color: var(--primary-blue-hover);
+    outline: none;
+}
+
 
 /* ---------------------------------
-   2. DASHBOARD SHELL (EXISTENTE)
+    2. DASHBOARD SHELL & SIDEBAR
 --------------------------------- */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 240px 1fr;
+    --sidebar-width: 240px; 
+    grid-template-columns: var(--sidebar-width) 1fr;
     min-height: 100vh;
 }
 #sidebar {
@@ -103,38 +145,139 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    transition: background-color var(--transition-medium), border-right var(--transition-medium);
 }
-.logo { font-size: 1.4rem; font-weight: 700; color: #ffc107; padding: 0 20px 30px; display: flex; align-items: center; }
-.logo i { margin-right: 10px; font-size: 1.8rem; }
+#sidebar .logo { 
+    font-size: 1.4rem; 
+    font-weight: 700; 
+    color: #ffc107; 
+    padding: 0 20px 30px; 
+    display: flex; 
+    align-items: center; 
+    transition: color var(--transition-medium);
+}
 .menu { list-style: none; flex-grow: 1; }
-.menu-item { padding: 12px 20px; font-size: 0.95rem; border-left: 5px solid transparent; }
-.menu-item.section-title { font-size: 0.8rem; color: #7f8c8d; margin-top: 20px; padding-bottom: 5px; }
-.menu-item:hover:not(.section-title) { background-color: #384d60; }
-.menu-item.active { background-color: var(--primary-blue); border-left-color: #ffc107; font-weight: 500; }
-.user-profile { padding: 15px 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: space-between; }
+.menu-item { 
+    padding: 12px 20px; 
+    font-size: 0.95rem; 
+    border-left: 5px solid transparent;
+    cursor: pointer; 
+    transition: background-color var(--transition-fast), border-left-color var(--transition-fast);
+}
+.menu-item.section-title { 
+    font-size: 0.8rem; 
+    color: #7f8c8d; 
+    margin-top: 20px; 
+    padding-bottom: 5px; 
+    pointer-events: none; 
+}
+.menu-item:hover:not(.section-title),
+.menu-item:focus:not(.section-title) { 
+    background-color: #384d60; 
+    outline: none;
+    /* Estilo de foco visual */
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.2); 
+}
+.menu-item.active { 
+    background-color: var(--primary-blue); 
+    border-left-color: #ffc107; 
+    font-weight: 500; 
+}
+.user-profile { 
+    padding: 15px 20px; 
+    border-top: 1px solid rgba(255, 255, 255, 0.1); 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    transition: border-top-color var(--transition-medium);
+}
 .user-details p { margin: 0; font-weight: 500; line-height: 1.2; font-size: 0.9rem;}
 .user-details span { font-size: 0.75rem; color: #adb5bd; }
-.signout-btn { background: none; border: none; color: #adb5bd; cursor: pointer; font-size: 1.1rem; transition: color 0.2s; }
-.signout-btn:hover { color: #dc3545; }
+.signout-btn { 
+    background: none; 
+    border: none; 
+    color: #adb5bd; 
+    cursor: pointer; 
+    font-size: 1.1rem; 
+    transition: color var(--transition-fast); 
+}
+.signout-btn:hover,
+.signout-btn:focus { 
+    color: var(--status-danger); 
+    outline: 2px solid var(--status-danger); 
+    outline-offset: 2px;
+    border-radius: 4px;
+}
 
 
-/* ÁREA PRINCIPAL E BOTÕES */
-#content-area { padding: 30px; }
-.main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #bdc3c7; }
-.main-header h1 { font-size: 2rem; color: var(--primary-dark); font-weight: 300; }
-.btn { padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s; font-size: 0.9rem; }
-.btn-primary { background-color: var(--primary-blue); color: white; border: none; }
-.btn-primary:hover { background-color: #0056b3; }
-.btn-secondary { background-color: white; border: var(--border-light); color: var(--primary-dark); }
-.btn-secondary:hover { background-color: #e9ecef; }
+/* ---------------------------------
+    3. ÁREA PRINCIPAL E BOTÕES
+--------------------------------- */
+#content-area { 
+    padding: 30px; 
+    transition: color var(--transition-medium);
+}
+.main-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 30px; 
+    padding-bottom: 15px; 
+    border-bottom: 2px solid #bdc3c7; 
+    transition: border-bottom-color var(--transition-medium);
+}
+.main-header h1 { 
+    font-size: 2rem; 
+    color: var(--primary-dark); 
+    font-weight: 300; 
+    transition: color var(--transition-medium);
+}
+.header-actions {
+    display: flex;
+    gap: 10px; 
+}
+.btn { 
+    padding: 8px 15px; 
+    border-radius: 6px; 
+    cursor: pointer; 
+    font-weight: 500; 
+    transition: all var(--transition-fast); 
+    font-size: 0.9rem; 
+    display: inline-flex; 
+    align-items: center;
+    gap: 5px;
+    border: 1px solid transparent; /* Garante que o outline não mude o tamanho */
+}
+.btn-primary { 
+    background-color: var(--primary-blue); 
+    color: white; 
+    border-color: var(--primary-blue);
+}
+.btn-primary:hover { background-color: var(--primary-blue-hover); }
+.btn-secondary { 
+    background-color: var(--card-background); 
+    border-color: var(--border-light); 
+    color: var(--primary-dark); 
+}
+.btn-secondary:hover { 
+    background-color: #e9ecef; 
+    border-color: #ced4da;
+}
+/* Estilos de foco para botões */
+.btn:focus {
+    outline: 3px solid rgba(52, 152, 219, 0.5); 
+    outline-offset: 1px;
+    border-color: transparent; /* Esconde a borda original para não duplicar */
+}
 .full-width { width: 100%; }
 
 /* GRID DE 3 COLUNAS (Dashboard) */
 .content-grid-dashboard {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr; 
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
     gap: 25px;
 }
+/* Classes de layout para cartões */
 .full-row { grid-column: 1 / span 3; } 
 .status-resumo-card { grid-column: 1 / span 2; } 
 .card-small { grid-column: 3; } 
@@ -145,32 +288,69 @@ body {
     border-radius: 10px;
     padding: 25px;
     box-shadow: var(--shadow-soft);
+    transition: background-color var(--transition-medium), box-shadow var(--transition-medium), border-color var(--transition-medium);
+    border: 1px solid transparent; 
 }
-.card h2 { font-size: 1.2rem; margin-bottom: 20px; color: var(--primary-dark); font-weight: 600; border-bottom: 1px solid #f4f4f4; padding-bottom: 10px; }
+.card h2 { 
+    font-size: 1.2rem; 
+    margin-bottom: 20px; 
+    color: var(--primary-dark); 
+    font-weight: 600; 
+    border-bottom: 1px solid #f4f4f4; 
+    padding-bottom: 10px; 
+    transition: color var(--transition-medium), border-bottom-color var(--transition-medium);
+}
 .card h2 i { margin-right: 8px; color: var(--primary-blue); }
 
 /* Inputs e Formulários */
-.simple-form .input-group { border: 2px solid #ecf0f1; border-radius: 6px; margin-bottom: 15px; background-color: #f7f9fb; padding: 0 10px; display: flex; align-items: center; }
-.simple-form input, .simple-form select { border: none; padding: 12px 0; width: 100%; background-color: transparent; font-size: 0.9rem; }
-.simple-form .input-group i { color: var(--secondary-gray); margin-right: 10px; font-size: 1rem; }
+.simple-form .input-group { 
+    border: 2px solid #ecf0f1; 
+    border-radius: 6px; 
+    margin-bottom: 15px; 
+    background-color: var(--input-background); 
+    padding: 0 10px; 
+    display: flex; 
+    align-items: center; 
+    transition: border-color var(--transition-medium), background-color var(--transition-medium);
+}
+.simple-form input, 
+.simple-form select { 
+    border: none; 
+    padding: 12px 0; 
+    width: 100%; 
+    background-color: transparent; 
+    font-size: 0.9rem; 
+    outline: none; 
+    transition: color var(--transition-medium);
+}
+.simple-form .input-group:focus-within { 
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+.simple-form .input-group i { 
+    color: var(--secondary-gray); 
+    margin-right: 10px; 
+    font-size: 1rem; 
+    transition: color var(--transition-medium);
+}
+
 
 /* ---------------------------------
-   3. PERSONALIZAÇÃO DE PERFIL ESTILOS
+    4. PERSONALIZAÇÃO DE PERFIL ESTILOS
 --------------------------------- */
 .perfil-customization-area {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Duas colunas na tela de perfil */
+    grid-template-columns: 1fr 1fr; 
     gap: 40px;
     padding-top: 10px;
 }
-
 .perfil-section {
     padding: 20px;
     border: var(--border-light);
     border-radius: 8px;
     background-color: #fcfcfc;
+    transition: background-color var(--transition-medium), border-color var(--transition-medium);
 }
-
 .perfil-section h3 {
     font-size: 1.1rem;
     color: var(--primary-dark);
@@ -178,121 +358,229 @@ body {
     padding-bottom: 8px;
     border-bottom: 1px dashed #ecf0f1;
     font-weight: 500;
+    transition: color var(--transition-medium), border-bottom-color var(--transition-medium);
 }
-
 .theme-options {
     display: flex;
     gap: 20px;
     margin-bottom: 20px;
 }
-
 .theme-label {
     display: block;
     cursor: pointer;
     font-size: 0.95rem;
     color: var(--primary-dark);
+    transition: color var(--transition-medium);
 }
-.theme-label input[type="radio"] { margin-right: 5px; accent-color: var(--primary-blue); }
+.theme-label input[type="radio"] { 
+    margin-right: 5px; 
+    accent-color: var(--primary-blue); 
+}
+.theme-label:focus-within { /* Acessibilidade: Indica qual opção de tema está focada */
+    outline: 2px solid var(--primary-blue);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
 
 
 /* ---------------------------------
-   MÓDULOS, STATUS E TABELA (MANTIDOS)
+    5. MÓDULOS, STATUS E TABELA
 --------------------------------- */
-.bancada-internal-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; padding-top: 10px; }
-.modulo-card { padding: 15px; border-radius: 8px; border: 1px solid #dcdde1; background-color: #fcfcfc; }
-.ambiente-data { margin-top: 15px; padding: 10px; background-color: #ecf0f1; border-radius: 4px; font-size: 0.85rem; display: flex; justify-content: space-around; font-weight: 500; }
-.estoque-visual, .expedicao-espacos { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 0; border-top: 1px dashed #ecf0f1; }
-.base-item { width: 15px; height: 15px; border-radius: 3px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); }
-.base-blue { background-color: var(--base-blue); } .base-black { background-color: var(--base-black); } .base-red { background-color: var(--base-red); }
+.bancada-internal-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+    gap: 20px; 
+    padding-top: 10px; 
+}
+.modulo-card { 
+    padding: 15px; 
+    border-radius: 8px; 
+    border: 1px solid #dcdde1; 
+    background-color: #fcfcfc; 
+    transition: background-color var(--transition-medium), border-color var(--transition-medium);
+}
+.ambiente-data { 
+    margin-top: 15px; 
+    padding: 10px; 
+    background-color: #ecf0f1; 
+    border-radius: 4px; 
+    font-size: 0.85rem; 
+    display: flex; 
+    justify-content: space-around; 
+    font-weight: 500; 
+    transition: background-color var(--transition-medium), color var(--transition-medium);
+}
 
+/* Visuais de Módulos (Estoque/Expedição) */
+.estoque-visual, .expedicao-espacos { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 4px; 
+    padding: 8px 0; 
+    border-top: 1px dashed #ecf0f1; 
+}
+.base-item { 
+    width: 15px; 
+    height: 15px; 
+    border-radius: 3px; 
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); 
+    transition: background-color var(--transition-medium);
+}
+.base-empty { 
+    background-color: var(--base-empty) !important;
+    opacity: 0.5;
+    box-shadow: none;
+}
+.base-blue { background-color: var(--base-blue); } 
+.base-black { background-color: var(--base-black); } 
+.base-red { background-color: var(--base-red); }
+
+/* Status Resumo */
 .status-grid-resumo { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px; }
-.status-resumo-card .status-item { flex: 1 1 150px; padding: 20px 10px; border-radius: 8px; color: white; font-weight: 600; text-align: center; box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); }
+.status-resumo-card .status-item { 
+    flex: 1 1 150px; 
+    padding: 20px 10px; 
+    border-radius: 8px; 
+    color: white; 
+    font-weight: 600; 
+    text-align: center; 
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); 
+    cursor: pointer; 
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+.status-resumo-card .status-item:hover,
+.status-resumo-card .status-item:focus { /* Adicionado foco */
+    transform: translateY(-3px); 
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    outline: none;
+}
 .status-resumo-card .status-item .count { display: block; font-size: 2rem; line-height: 1; margin-bottom: 5px;}
 
-.status-secondary { background-color: var(--status-secondary); } .status-warning { background-color: var(--status-warning); } .status-info { background-color: var(--status-info); } .status-success { background-color: var(--status-success); } .status-danger { background-color: var(--status-danger); }
+/* Classes de Cores de Status */
+.status-secondary { background-color: var(--status-secondary); } 
+.status-warning { background-color: var(--status-warning); } 
+.status-info { background-color: var(--status-info); } 
+.status-success { background-color: var(--status-success); } 
+.status-danger { background-color: var(--status-danger); }
 
-.table-placeholder table { border-collapse: separate; border-spacing: 0 5px; margin-top: 15px; }
-.table-placeholder th { background-color: #ecf0f1; color: var(--primary-dark); font-weight: 600; text-transform: uppercase; font-size: 0.75rem; border: none; padding: 12px 15px; }
-.table-placeholder td { background-color: #fcfcfc; border-bottom: none; padding: 12px 15px; font-size: 0.85rem; }
-.table-placeholder tr:hover td { background-color: #f4f6f9; }
-.table-status { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; color: white; display: inline-block; }
-.status-table-info { background-color: var(--status-info); } .status-table-warning { background-color: var(--status-warning); } .status-table-success { background-color: var(--status-success); } .status-table-secondary { background-color: var(--status-secondary); }
+/* Tabela de Pedidos */
+.table-placeholder {
+    overflow-x: auto; 
+    margin-top: 15px;
+    border-radius: 8px;
+}
+.table-placeholder table { 
+    width: 100%; 
+    border-collapse: separate; 
+    border-spacing: 0 5px; 
+    min-width: 700px; 
+}
+.table-placeholder th { 
+    background-color: #ecf0f1; 
+    color: var(--primary-dark); 
+    font-weight: 600; 
+    text-transform: uppercase; 
+    font-size: 0.75rem; 
+    border: none; 
+    padding: 12px 15px; 
+    text-align: left; 
+    transition: background-color var(--transition-medium), color var(--transition-medium);
+}
+.table-placeholder td { 
+    background-color: #fcfcfc; 
+    border-bottom: none; 
+    padding: 12px 15px; 
+    font-size: 0.85rem; 
+    border-radius: 4px; 
+    transition: background-color var(--transition-medium), border-color var(--transition-medium);
+}
+.table-placeholder tr:hover td { 
+    background-color: #f4f6f9; 
+}
+
+/* Estilo para os Status/Badges da Tabela (Refatorado) */
+.table-status-badge { 
+    padding: 4px 8px; 
+    border-radius: 4px; 
+    font-size: 0.75rem; 
+    font-weight: 600; 
+    color: white; 
+    display: inline-block; 
+}
+/* Classes de cores da Tabela (Ajustadas para 'badge-') */
+.badge-info { background-color: var(--status-info); } 
+.badge-warning { background-color: var(--status-warning); } 
+.badge-success { background-color: var(--status-success); } 
+.badge-secondary { background-color: var(--status-secondary); }
+.badge-danger { background-color: var(--status-danger); } /* Adicionado */
+
 
 /* ---------------------------------
-   ANIMAÇÕES PERSONALIZADAS DE VIEW
+    6. ANIMAÇÕES PERSONALIZADAS DE VIEW
 --------------------------------- */
-
-/* Garante que todas as views fiquem escondidas por padrão e prontas para a transição */
 .view {
     display: none;
     opacity: 0;
-    transform: translateX(20px); /* Começa ligeiramente à direita */
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out; /* Transição suave */
-    height: 100%;
+    /* Posição para a animação */
+    position: absolute; 
+    left: 270px; 
+    top: 30px; 
+    width: calc(100% - 300px); 
+    height: auto; 
+    pointer-events: none; 
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
 }
-
-/* Estado da view quando está ativa (visível) */
 .view.active-view {
-    display: block; /* Torna a view visível no layout */
-    opacity: 1; /* Transição de opacidade (fade-in) */
-    transform: translateX(0); /* Transição de posição (slide-in) */
+    position: static; 
+    display: flex; 
+    flex-direction: column;
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
 }
-
-/* Estilos para garantir que o conteúdo da seção de perfil/dashboard se ajuste */
+/* Garante que o conteúdo da view se ajuste ao layout */
 #dashboard-view.view,
-#perfil-view.view,
 #pedidos-view.view,
-#usuarios-view.view,
-#config-view.view {
-    /* Faz a seção preencher o espaço, mas só quando está ativa */
-    display: flex;
-    flex-direction: column; 
+#perfil-view.view {
+    padding-top: 15px;
 }
-
-/* Corrige o problema de layout que pode surgir com a transição, garantindo que a view ativa preencha o espaço */
+/* Posicionamento Inicial para Animação */
 .view:not(.active-view) {
-    position: absolute; /* Remove o elemento não ativo do fluxo */
-    left: 240px; /* Alinha o início da view com o final da sidebar */
-    top: 0; /* Alinha ao topo */
-    width: calc(100% - 240px); /* Garante que a largura seja correta */
-    pointer-events: none; /* Impede interações com views ocultas */
-
+    transform: translateX(20px); 
 }
+
+
 /* ---------------------------------
-   VARIAÇÕES DE TEMA ESCURO (DARK MODE)
+    7. TEMA ESCURO (DARK MODE) REFINADO
 --------------------------------- */
 
-/* Estilos de transição para suavizar a mudança de tema */
-body, .card, #sidebar, .simple-form .input-group, .modulo-card, .menu-item, .main-header, .ambiente-data {
-    transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease;
-}
-
-/* Definição das cores para o Tema Escuro */
 body.dark-mode {
-    --primary-dark: #f0f0f0; /* Texto principal claro */
-    --background-color: #1a1a2e; /* Fundo escuro profundo */
-    --card-background: #252540; /* Card escuro */
-    --shadow-soft: 0 6px 15px rgba(0, 0, 0, 0.4); /* Sombra mais intensa */
-    --border-light: 1px solid #333350; /* Borda escura */
-    --secondary-gray: #b0b0c0; /* Texto secundário */
+    --primary-dark: #f0f0f0; 
+    --background-color: #1a1a2e; 
+    --card-background: #252540; 
+    --input-background: #202030;
+    --shadow-soft: 0 6px 15px rgba(0, 0, 0, 0.4); 
+    --border-light: 1px solid #333350; 
+    --secondary-gray: #b0b0c0;
 }
 
-/* Aplicação de estilos escuros */
+.dark-mode .login-card {
+    border: var(--border-light);
+}
 .dark-mode #sidebar {
-    background-color: #151525; /* Sidebar ainda mais escura */
+    background-color: #151525; 
     border-right: var(--border-light);
 }
 
 .dark-mode #sidebar .logo {
-    color: var(--primary-blue); /* Mantém o destaque do logo */
+    color: var(--primary-blue); 
 }
 
 .dark-mode .menu-item:hover:not(.section-title) {
     background-color: #202030;
 }
-
-.dark-mode #content-area {
-    color: var(--primary-dark);
+.dark-mode .menu-item:focus:not(.section-title) {
+    box-shadow: inset 0 0 0 2px rgba(52, 152, 219, 0.5); /* Foco em azul */
 }
 
 .dark-mode .main-header {
@@ -302,12 +590,26 @@ body.dark-mode {
 .dark-mode .card,
 .dark-mode .modulo-card {
     background-color: var(--card-background);
-    border: var(--border-light);
+    border: var(--border-light); 
+}
+
+.dark-mode .card h2 {
+    color: var(--primary-dark);
+    border-bottom-color: #333350;
+}
+
+.dark-mode .btn-secondary {
+    background-color: #333350;
+    color: var(--primary-dark);
+    border-color: #444460;
+}
+.dark-mode .btn-secondary:hover {
+    background-color: #404060;
 }
 
 .dark-mode .simple-form .input-group {
     border-color: #333350;
-    background-color: #202030;
+    background-color: var(--input-background);
 }
 
 .dark-mode .simple-form input,
@@ -321,7 +623,7 @@ body.dark-mode {
 }
 
 .dark-mode .table-placeholder td {
-    background-color: #252540;
+    background-color: var(--card-background);
     border-bottom: var(--border-light);
 }
 .dark-mode .table-placeholder tr:hover td {
@@ -334,38 +636,102 @@ body.dark-mode {
     background-color: #202030;
     border-color: #333350;
 }
+.dark-mode .estoque-visual, 
+.dark-mode .expedicao-espacos {
+    border-top-color: #333350;
+}
+.dark-mode .perfil-section h3 {
+    border-bottom-color: #333350;
+}
 
-/* Estilos da nova tela de configurações */
-.config-settings-area {
-    display: grid;
-    grid-template-columns: 1fr 1fr; 
-    gap: 40px;
-    padding-top: 10px;
+
+/* ---------------------------------
+    8. RESPONSIVIDADE (MOBILE/TABLET)
+--------------------------------- */
+
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        --sidebar-width: 200px;
+        grid-template-columns: var(--sidebar-width) 1fr;
+    }
+    #content-area {
+        padding: 20px;
+    }
+    .main-header h1 {
+        font-size: 1.6rem;
+    }
+    .btn {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+    }
 }
-.setting-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px dashed #ecf0f1;
+
+@media (max-width: 768px) {
+    /* Layout de coluna única e sidebar fixa no topo (Header Mobile) */
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    #sidebar {
+        position: fixed;
+        width: 100%;
+        height: 60px; 
+        flex-direction: row;
+        align-items: center;
+        padding: 0 20px;
+        z-index: 1000;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Sombra para destacar o header */
+    }
+    #sidebar .logo {
+        padding: 0;
+    }
+    #sidebar .menu, #sidebar .user-profile {
+        display: none; 
+    }
+
+    #content-area {
+        padding-top: 80px; /* Espaço para o header/sidebar fixo */
+    }
+    .main-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+        margin-top: 0;
+        padding-top: 0;
+    }
+    .header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .content-grid-dashboard {
+        grid-template-columns: 1fr;
+    }
+    .full-row, .status-resumo-card, .card-small {
+        grid-column: 1 / span 1; 
+    }
+    .bancada-internal-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+    .perfil-customization-area {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+    /* Corrige o posicionamento da view para que inicie corretamente abaixo do header fixo */
+    .view {
+        left: 20px; 
+        top: 80px; /* Ajusta para o novo padding-top da content-area */
+        width: calc(100% - 40px);
+    }
 }
-.dark-mode .setting-item {
-    border-bottom: 1px dashed #333350;
-}
-.setting-item label {
-    font-weight: 500;
-}
-.setting-item input[type="number"] {
-    width: 60px;
-    padding: 5px;
-    border: var(--border-light);
-    border-radius: 4px;
-    text-align: center;
-    background-color: var(--card-background);
-    color: var(--primary-dark);
-}
-.setting-item input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    accent-color: var(--primary-blue);
+
+@media (max-width: 480px) {
+    .login-card {
+        padding: 30px 20px;
+    }
+    .main-header h1 {
+        font-size: 1.4rem;
+    }
+    .header-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
 }

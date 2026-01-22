@@ -1,0 +1,47 @@
+body {
+    padding:;
+    margin: 0;
+    width: 100vw;
+    height: 100%;
+}
+
+.form-inteiro{
+    width: 600px;
+    border: 1px #DCDCDC solid;
+    background-color: #DDD;
+    padding: 4px;
+}
+
+.form-inteiro div{
+    padding: 16px;
+}
+
+input,select{
+    width: 30%;
+    border: 1px #aeaeae solid;
+    background-color: #efefef;
+    font-size: 26px;
+    height: 32px;
+}
+
+.butao{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+button{
+    width: 200px;
+    height: 40px;
+    background-color: coral;
+    border: 0;
+    border-radius: 10px;
+    color: white;
+}
+
+.resultados{
+    font-size: 18px;
+    font-family: arial;
+    padding: 8px;
+}

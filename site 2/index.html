@@ -11,7 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
-    
+    <h1></h1>
+    <div id="display-leitura"></div>
     <div id="login-page" class="active" role="dialog" aria-labelledby="login-title">
         <div class="login-container">
             <div class="login-card">
@@ -44,13 +45,23 @@
                         <i class="fas fa-envelope" aria-hidden="true"></i>
                         <input type="email" placeholder="Email" required autocomplete="email"> 
                     </div>
+                    <div class="input-box">
+    <input 
+        type="date" 
+        id="signup-birthdate" 
+        placeholder="Data de Nascimento" 
+        required
+    >
+</div>
+
                     <div class="input-group">
                         <i class="fas fa-lock" aria-hidden="true"></i>
-                        <input type="password" placeholder="Nova Senha" required autocomplete="new-password">
+                        <input type="password" placeholder="Senha" required autocomplete="new-password">
                     </div>
                     <button type="submit" class="btn btn-secondary full-width">Criar Conta</button>
                 </form>
                 <p class="switch-form-text hidden" id="show-login-text">Já tem conta? <a href="#" id="show-login" role="button">Login</a></p>
+                
 
             </div>
         </div>
@@ -69,6 +80,8 @@
                 <li class="menu-item section-title" aria-label="Seção Controle">Controle</li> 
                 <li class="menu-item" data-view="pedidos" role="menuitem"><i class="fas fa-list-alt" aria-hidden="true"></i> Pedidos</li>
                 <li class="menu-item" data-view="usuarios" role="menuitem"><i class="fas fa-users" aria-hidden="true"></i> Usuários</li>
+                <div class="users-container">
+    
                 
                 <li class="menu-item section-title" aria-label="Seção Conta">Conta</li> 
                 <li class="menu-item" data-view="perfil" role="menuitem"><i class="fas fa-user-circle" aria-hidden="true"></i> Perfil</li> 
@@ -229,6 +242,25 @@
 
             <section id="usuarios-view" class="view" role="region" aria-labelledby="usuarios-title">
                 <h2 id="usuarios-title">Gerência de Usuários</h2><p>Tabela e ferramentas de gestão de usuários aqui.</p>
+                <div class="users-container">
+    <h2></h2>
+    <p></p>
+
+    <div class="users-actions">
+
+        <button class="user-btn" id="btn-create">➕ Criar Usuário</button>
+        <button class="user-btn" id="btn-list">📄 Listar Usuários</button>
+        <button class="user-btn" id="btn-edit">✏️ Alterar Usuário</button>
+        <button class="user-btn" id="btn-remove">🗑️ Remover Usuário</button>
+        <button class="user-btn" id="btn-smart">🛰️ Dados do SmartSense</button>
+
+    </div>
+
+    <div id="users-result" class="result-box">
+        <!-- Aqui aparecem as respostas (lista, dados, etc) -->
+    </div>
+</div>
+
             </section>
 
             <section id="config-view" class="view" role="region" aria-labelledby="config-title">
@@ -236,6 +268,7 @@
             </section>
         </main>
     </div>
+<script type="module" src="main.js"></script>
 
     <script src="script.js" defer></script> 
 </body>

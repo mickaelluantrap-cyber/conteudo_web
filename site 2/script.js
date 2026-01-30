@@ -1,9 +1,12 @@
 /**
+ * 
+ * 
+ * 
  * ============================================
  * PRODFLOW | DASHBOARD DE PRODUÇÃO - SCRIPTS
  * ============================================
  */
-
+const STORAGE_KEY = 'prodflow_user_data';
 // ------------------------------------
 // 1. Dados Mock (Simulando o sistema ProdFlow)
 // ------------------------------------
@@ -69,6 +72,26 @@ const DOM = {
     refreshDataButton: document.querySelector('[data-action="refresh-data"]') 
 };
 
+// Substitua pelo IP onde o seu Node-RED está rodando
+const socket = new WebSocket('ws://192.168.1.50:1880/dados-bancada');
+
+socket.onopen = () => {
+    console.log("Conectado à bancada!");
+};
+
+socket.onmessage = (event) => {
+    const dados = event.data;
+    const display = document.getElementById('display-leitura');
+    
+    // Atualiza a tela com o valor recebido
+    display.innerText = `Valor Atual: ${dados}`;
+    
+    // Opcional: Se os dados forem JSON, use JSON.parse(event.data)
+};
+
+socket.onerror = (error) => {
+    console.error("Erro na conexão:", error);
+};
 
 // ------------------------------------
 // 3. Utilitários e Helpers
@@ -290,33 +313,49 @@ const showLoginForm = () => {
     if (switchTextLogin) switchTextLogin.classList.remove('hidden');
 };
 
-const handleLogin = (event) => {
+const handleLogin = async (event) => {
     event.preventDefault();
-    
-    const usernameInput = document.getElementById('login-username');
-    const passwordInput = document.getElementById('login-password');
-    
-    // Usa a tradução correta no alerta
-    const lang = appData.usuario.language;
-    const translationKey = lang === 'en-us' ? 'alert_fill_user_pass' : 'alert_fill_user_pass'; 
-    
-    if (!usernameInput.value || !passwordInput.value) {
-        alert("Preencha Usuário e Senha para simular o Login.");
+
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value.trim();
+
+    if (!username || !password) {
+        alert("Preencha usuário e senha.");
         return;
     }
-    
+
+    // 🔵 ENVIAR DADOS PARA O NODE-RED
+    try {
+        const resposta = await fetch("http://localhost:1880/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ usuario: username, senha: password })
+        });
+
+        const data = await resposta.json();
+
+        if (data.status !== "ok") {
+            alert("Usuário ou senha inválidos");
+            return;
+        }
+    } catch (erro) {
+        console.error("Erro na requisição:", erro);
+        alert("Erro ao conectar com o servidor Node-RED.");
+        return;
+    }
+
+    // 🔵 SE O NODE-RED ACEITAR, DESBLOQUEAR DASHBOARD
     appData.isLoggedIn = true;
-    
-    const rawUsername = usernameInput.value;
-    appData.usuario.nome = rawUsername.charAt(0).toUpperCase() + rawUsername.slice(1).split('@')[0];
-    appData.usuario.email = rawUsername.includes('@') ? rawUsername : `${rawUsername}@prodflow.com`;
-    appData.usuario.tipo = 'Operador'; 
-    
-    saveDataToLocalStorage(); 
-    
-    DOM.loginPage.classList.add('hidden');
-    DOM.dashboardShell.classList.remove('hidden');
-    
+
+    appData.usuario.nome = username.split("@")[0];
+    appData.usuario.email = username.includes("@") ? username : `${username}@prodflow.com`;
+    appData.usuario.tipo = "Operador";
+
+    saveDataToLocalStorage();
+
+    DOM.loginPage.classList.add("hidden");
+    DOM.dashboardShell.classList.remove("hidden");
+
     initializeApp();
 };
 
@@ -548,6 +587,7 @@ const simulateDataUpdate = () => {
 // ------------------------------------
 
 const setupNavigation = () => {
+    
     const menuItems = document.querySelectorAll('.menu-item[data-view]'); 
     const views = document.querySelectorAll('.view');
 
@@ -580,6 +620,23 @@ const setupNavigation = () => {
 };
 
 const initializeApp = () => {
+const fetchGlobalData = async () => {
+    try {
+        const response = await fetch('http://192.168.1.50:1880/api/dados-producao');
+        const data = await response.json();
+        
+        // Atualiza o appData com o que veio do Node-RED
+        appData.pedidos = data.pedidos;
+        appData.statusContagem = data.contagem;
+        
+        // Re-renderiza as tabelas
+        renderStatusResumo();
+        renderPedidosTable();
+    } catch (err) {
+        console.error("Erro ao buscar dados reais do Node-RED", err);
+    }
+};
+    
     // 1. TENTA CARREGAR DADOS SALVOS
     loadDataFromLocalStorage(); 
 
@@ -650,3 +707,226 @@ document.addEventListener('DOMContentLoaded', () => {
     // Inicia a aplicação
     initializeApp();
 });
+// Função para carregar usuários na visão de usuários
+const renderUsuariosView = async () => {
+    const container = document.getElementById('usuarios-view');
+    if (!container) return;
+
+    try {
+        const res = await fetch('http://192.168.1.50:1880/api/usuarios');
+        const usuarios = await res.json();
+
+        container.innerHTML = `
+            <h2><i class="fas fa-users"></i> Gerência de Usuários</h2>
+            <table class="prodflow-table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Tipo</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${usuarios.map(u => `
+                        <tr>
+                            <td>${u.nome}</td>
+                            <td>${u.email}</td>
+                            <td>${u.tipo}</td>
+                            <td>
+                                <button onclick="deletarUsuario(${u.id})" class="btn-icon delete"><i class="fas fa-trash"></i></button>
+                                <button onclick="prepararEdicao(${u.id})" class="btn-icon edit"><i class="fas fa-edit"></i></button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    } catch (err) {
+        container.innerHTML = "<p>Erro ao carregar usuários do servidor.</p>";
+    }
+};
+
+// Função para Deletar (Requisito: Remover Usuário)
+window.deletarUsuario = async (id) => {
+    if(confirm("Deseja realmente excluir este usuário?")) {
+        await fetch(`http://192.168.1.50:1880/api/usuarios/${id}`, { method: 'DELETE' });
+        renderUsuariosView(); // Atualiza a lista
+    }
+};
+socket.onmessage = (event) => {
+    try {
+        const dados = JSON.parse(event.data);
+        const display = document.getElementById('display-leitura');
+        // Exemplo: se o JSON for { "valor": 25.5 }
+        display.innerText = `Valor Atual: ${dados.valor || event.data}`;
+    } catch (e) {
+        document.getElementById('display-leitura').innerText = `Valor Atual: ${event.data}`;
+    }
+};
+
+
+fetch("http://localhost:1880/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+        usuario: document.getElementById("usuario").value,
+        senha: document.getElementById("senha").value
+    })
+})
+.then(r => r.json())
+.then(data => console.log(data));
+
+
+
+// ================================
+//  ENVIO DO LOGIN PARA O NODE-RED
+// ================================
+async function enviarLoginParaNodeRed(usuario, senha) {
+    try {
+        const resposta = await fetch("http://192.168.1.50:1880/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ usuario, senha })
+        });
+
+        const dados = await resposta.json();
+        console.log("Resposta Node-RED:", dados);
+
+        return dados;
+
+    } catch (erro) {
+        console.error("Erro ao enviar login:", erro);
+        return { status: "erro" };
+    }
+}
+
+DOM.loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const usuario = document.getElementById("login-username").value;
+    const senha = document.getElementById("login-password").value;
+
+    // Envia para o Node-RED
+    const resposta = await enviarLoginParaNodeRed(usuario, senha);
+
+    if (resposta.status === "ok") {
+        console.log("Login salvo no Node-RED!");
+
+        // Aqui você libera o dashboard
+        DOM.loginPage.classList.add("hidden");
+        DOM.dashboardShell.classList.remove("hidden");
+
+        // Atualiza o nome do usuário no painel
+        DOM.currentUserSpan.textContent = usuario;
+
+    } else {
+        alert("Erro ao fazer login!");
+    }
+});
+
+const birthdate = document.getElementById("signup-birthdate").value;
+
+body: JSON.stringify({
+    nome,
+    email,
+    birthdate,
+    senha
+})
+
+const resultBox = document.getElementById("users-result");
+
+// Criar usuário
+document.getElementById("btn-create").onclick = () => {
+    resultBox.innerHTML = `
+        <h3>Criar Usuário</h3>
+        <input id="new-name" placeholder="Nome" class="input" />
+        <input id="new-email" placeholder="Email" class="input" />
+        <input id="new-birth" type="date" class="input" />
+        <input id="new-pass" type="password" placeholder="Senha" class="input" />
+        <button onclick="sendCreate()">Salvar</button>
+    `;
+};
+
+function sendCreate() {
+    fetch("http://localhost:1880/createUser", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            nome: document.getElementById("new-name").value,
+            email: document.getElementById("new-email").value,
+            nascimento: document.getElementById("new-birth").value,
+            senha: document.getElementById("new-pass").value,
+        })
+    })
+    .then(r => r.json())
+    .then(data => resultBox.innerHTML = JSON.stringify(data, null, 2));
+}
+
+// Listar usuários
+document.getElementById("btn-list").onclick = () => {
+    fetch("http://localhost:1880/listUsers")
+    .then(r => r.json())
+    .then(data => {
+        resultBox.innerHTML = "<h3>Usuários Cadastrados</h3>";
+        data.forEach(u => {
+            resultBox.innerHTML += `<p>👤 ${u.nome} — ${u.email}</p>`;
+        });
+    });
+};
+
+// Alterar usuário
+document.getElementById("btn-edit").onclick = () => {
+    resultBox.innerHTML = `
+        <h3>Alterar Usuário</h3>
+        <input id="edit-email" placeholder="Email do usuário" class="input" />
+        <input id="edit-newname" placeholder="Novo nome" class="input" />
+        <button onclick="sendEdit()">Salvar Alterações</button>
+    `;
+};
+
+function sendEdit() {
+    fetch("http://localhost:1880/updateUser", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            email: document.getElementById("edit-email").value,
+            novoNome: document.getElementById("edit-newname").value,
+        })
+    })
+    .then(r => r.json())
+    .then(data => resultBox.innerHTML = JSON.stringify(data, null, 2));
+}
+
+// Remover usuário
+document.getElementById("btn-remove").onclick = () => {
+    resultBox.innerHTML = `
+        <h3>Remover Usuário</h3>
+        <input id="remove-email" placeholder="Email do usuário" class="input" />
+        <button onclick="sendRemove()">Remover</button>
+    `;
+};
+
+
+function sendRemove() {
+    fetch("http://localhost:1880/deleteUser", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            email: document.getElementById("remove-email").value
+        })
+    })
+    .then(r => r.json())
+    .then(data => resultBox.innerHTML = JSON.stringify(data, null, 2));
+}
+
+// Buscar dados da bancada SmartSense
+document.getElementById("btn-smart").onclick = () => {
+    fetch("http://localhost:1880/smartsense")
+    .then(r => r.json())
+    .then(data => {
+        resultBox.innerHTML = "<h3>Dados da Bancada SmartSense</h3>";
+        resultBox.innerHTML += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+    });
+};
+

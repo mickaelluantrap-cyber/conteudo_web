@@ -1,0 +1,598 @@
+[
+    {
+        "id": "f6f2187d.f17ca8",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "4fc2b01714260ebb",
+        "type": "tab",
+        "label": "login",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "af8f4ee788eb7f9f",
+        "type": "tab",
+        "label": "login 2.0",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "db35a1b23324bf64",
+        "type": "tab",
+        "label": "Usuarios API",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "e0350d6325aa2e2c",
+        "type": "tab",
+        "label": "Estoque",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "478e8eb21d3c9432",
+        "type": "tab",
+        "label": "Fluxo 2",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "0428c90eaf76816a",
+        "type": "mqtt-broker",
+        "name": "Broker Bancada",
+        "broker": "10.77.241.65",
+        "port": "1887",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "0561c4cd713c19fb",
+        "type": "mqtt-broker",
+        "name": "Broker Bancada",
+        "broker": "10.77.241.113",
+        "port": "1887",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "0b31707bbda4d45b",
+        "type": "MySQLdatabase",
+        "name": "",
+        "host": "127.0.0.1",
+        "port": "3306",
+        "db": "senai_projeto",
+        "tz": "",
+        "charset": "UTF8"
+    },
+    {
+        "id": "3be8c3abde6a815e",
+        "type": "http in",
+        "z": "4fc2b01714260ebb",
+        "name": "recebe dados login",
+        "url": "/auteticacao/autenticar",
+        "method": "post",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 160,
+        "wires": [
+            [
+                "c52986e66e225f10",
+                "fab4507b4226b700"
+            ]
+        ]
+    },
+    {
+        "id": "fab4507b4226b700",
+        "type": "http response",
+        "z": "4fc2b01714260ebb",
+        "name": "responde ok",
+        "statusCode": "200",
+        "headers": {},
+        "x": 450,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "c52986e66e225f10",
+        "type": "debug",
+        "z": "4fc2b01714260ebb",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 440,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "b306596fad638c23",
+        "type": "mysql",
+        "z": "4fc2b01714260ebb",
+        "name": "",
+        "x": 670,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a8d4b3d7e4abc527",
+        "type": "http in",
+        "z": "af8f4ee788eb7f9f",
+        "name": "",
+        "url": "/login",
+        "method": "post",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 230,
+        "y": 240,
+        "wires": [
+            [
+                "c4e38b293153b3b0",
+                "28a4adaa38c1fe9f"
+            ]
+        ]
+    },
+    {
+        "id": "c4e38b293153b3b0",
+        "type": "json",
+        "z": "af8f4ee788eb7f9f",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 410,
+        "y": 240,
+        "wires": [
+            [
+                "13716dc11f8a40a7"
+            ]
+        ]
+    },
+    {
+        "id": "13716dc11f8a40a7",
+        "type": "function",
+        "z": "af8f4ee788eb7f9f",
+        "name": "function 2",
+        "func": "const usuario = msg.payload.usuario;\nconst senha = msg.payload.senha;\n\n// Guarda globalmente\nglobal.set(\"usuario_login\", usuario);\nglobal.set(\"senha_login\", senha);\n\n// Prepara resposta\nmsg.payload = {\n    status: \"ok\",\n    usuarioRecebido: usuario\n};\n\nreturn msg;\nmsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 580,
+        "y": 240,
+        "wires": [
+            [
+                "487d1364fba17f78"
+            ]
+        ]
+    },
+    {
+        "id": "487d1364fba17f78",
+        "type": "http response",
+        "z": "af8f4ee788eb7f9f",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 970,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "28a4adaa38c1fe9f",
+        "type": "debug",
+        "z": "af8f4ee788eb7f9f",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 400,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "createUser",
+        "type": "http in",
+        "z": "db35a1b23324bf64",
+        "name": "",
+        "url": "/createUser",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 80,
+        "wires": [
+            [
+                "createUserFn"
+            ]
+        ]
+    },
+    {
+        "id": "createUserFn",
+        "type": "function",
+        "z": "db35a1b23324bf64",
+        "name": "Criar Usuário",
+        "func": "let fs = global.get('fs');\n\nlet users = [];\n\ntry {\n    users = JSON.parse(fs.readFileSync('users.json'));\n} catch (e) {}\n\nusers.push(msg.payload);\n\nfs.writeFileSync('users.json', JSON.stringify(users, null, 2));\n\nmsg.payload = {status: 'ok', message: 'Usuário criado!'};\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "global.set('fs', require('fs'));",
+        "finalize": "",
+        "libs": [],
+        "x": 330,
+        "y": 80,
+        "wires": [
+            [
+                "resp"
+            ]
+        ]
+    },
+    {
+        "id": "resp",
+        "type": "http response",
+        "z": "db35a1b23324bf64",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 850,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "listUsers",
+        "type": "http in",
+        "z": "db35a1b23324bf64",
+        "name": "",
+        "url": "/listUsers",
+        "method": "get",
+        "x": 110,
+        "y": 160,
+        "wires": [
+            [
+                "listUsersFn"
+            ]
+        ]
+    },
+    {
+        "id": "listUsersFn",
+        "type": "function",
+        "z": "db35a1b23324bf64",
+        "name": "Listar",
+        "func": "let fs = global.get('fs');\nlet users = [];\n\ntry {\n    users = JSON.parse(fs.readFileSync('users.json'));\n} catch (e) {}\n\nmsg.payload = users;\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 330,
+        "y": 160,
+        "wires": [
+            [
+                "resp"
+            ]
+        ]
+    },
+    {
+        "id": "updateUser",
+        "type": "http in",
+        "z": "db35a1b23324bf64",
+        "name": "",
+        "url": "/updateUser",
+        "method": "post",
+        "x": 130,
+        "y": 240,
+        "wires": [
+            [
+                "updateUserFn"
+            ]
+        ]
+    },
+    {
+        "id": "updateUserFn",
+        "type": "function",
+        "z": "db35a1b23324bf64",
+        "name": "Alterar",
+        "func": "let fs = global.get('fs');\nlet users = JSON.parse(fs.readFileSync('users.json'));\n\nlet email = msg.payload.email;\n\nlet user = users.find(u => u.email === email);\n\nif (user) {\n    user.nome = msg.payload.nome;\n    user.nascimento = msg.payload.nascimento;\n}\n\nfs.writeFileSync('users.json', JSON.stringify(users, null, 2));\n\nmsg.payload = {status: 'ok', message: 'Usuário atualizado'};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 340,
+        "y": 240,
+        "wires": [
+            [
+                "resp"
+            ]
+        ]
+    },
+    {
+        "id": "deleteUser",
+        "type": "http in",
+        "z": "db35a1b23324bf64",
+        "url": "/deleteUser",
+        "method": "post",
+        "x": 130,
+        "y": 320,
+        "wires": [
+            [
+                "deleteUserFn"
+            ]
+        ]
+    },
+    {
+        "id": "deleteUserFn",
+        "type": "function",
+        "z": "db35a1b23324bf64",
+        "name": "Remover",
+        "func": "let fs = global.get('fs');\nlet users = JSON.parse(fs.readFileSync('users.json'));\n\nusers = users.filter(u => u.email !== msg.payload.email);\n\nfs.writeFileSync('users.json', JSON.stringify(users, null, 2));\n\nmsg.payload = {status: 'ok', message: 'Usuário removido'};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 340,
+        "y": 320,
+        "wires": [
+            [
+                "resp"
+            ]
+        ]
+    },
+    {
+        "id": "smartsense",
+        "type": "http in",
+        "z": "db35a1b23324bf64",
+        "url": "/smartsense",
+        "method": "get",
+        "x": 120,
+        "y": 400,
+        "wires": [
+            [
+                "smartsenseFn"
+            ]
+        ]
+    },
+    {
+        "id": "smartsenseFn",
+        "type": "function",
+        "z": "db35a1b23324bf64",
+        "name": "SmartSense Data",
+        "func": "msg.payload = {\n    temperatura: 24.7,\n    umidade: 63,\n    status: \"OK\",\n    mensagem: \"Exemplo — substitua pelos dados reais depois\"\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 340,
+        "y": 400,
+        "wires": [
+            [
+                "resp"
+            ]
+        ]
+    },
+    {
+        "id": "3c5662feb042d253",
+        "type": "mqtt in",
+        "z": "e0350d6325aa2e2c",
+        "name": "[Smartsense] Estoque",
+        "topic": "/smartsense/estoque",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "0561c4cd713c19fb",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 160,
+        "y": 100,
+        "wires": [
+            [
+                "f5a4ab42609a9421"
+            ]
+        ]
+    },
+    {
+        "id": "f5a4ab42609a9421",
+        "type": "function",
+        "z": "e0350d6325aa2e2c",
+        "name": "Remove status da mensagem",
+        "func": "//Coloca o payload em uma variável\nlet dados = msg.payload;\n\n//Monta o proximo payload do jeito que querermos\nlet info_ajustada = {\n    timestamp : dados.timestamp,\n    dados : dados.data\n}\n\n//Atualiza o payload\nmsg.payload = info_ajustada\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 450,
+        "y": 100,
+        "wires": [
+            [
+                "cb5a38fb52335033",
+                "d9bbe0ade06f1f17"
+            ]
+        ]
+    },
+    {
+        "id": "cb5a38fb52335033",
+        "type": "json",
+        "z": "e0350d6325aa2e2c",
+        "name": "Converter para string",
+        "property": "payload",
+        "action": "str",
+        "pretty": false,
+        "x": 780,
+        "y": 100,
+        "wires": [
+            [
+                "7439ef3fec82262f"
+            ]
+        ]
+    },
+    {
+        "id": "7439ef3fec82262f",
+        "type": "file",
+        "z": "e0350d6325aa2e2c",
+        "name": "Grava valor atual estoque",
+        "filename": "valor_atual_estoque.json",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 1050,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "fb87950f44853db5",
+        "type": "file in",
+        "z": "e0350d6325aa2e2c",
+        "name": "",
+        "filename": "valor_atual_estoque.json",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 410,
+        "y": 260,
+        "wires": [
+            [
+                "e9576529b94e57a9"
+            ]
+        ]
+    },
+    {
+        "id": "d4eb918d3ebe5dd2",
+        "type": "http in",
+        "z": "e0350d6325aa2e2c",
+        "name": "[Endpoint] Estoque",
+        "url": "/smartsense/estoque",
+        "method": "get",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 260,
+        "wires": [
+            [
+                "fb87950f44853db5"
+            ]
+        ]
+    },
+    {
+        "id": "1f9c47d739597646",
+        "type": "http response",
+        "z": "e0350d6325aa2e2c",
+        "name": "[Response] Estoque",
+        "statusCode": "200",
+        "headers": {},
+        "x": 920,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "e9576529b94e57a9",
+        "type": "json",
+        "z": "e0350d6325aa2e2c",
+        "name": "Converter para objeto",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 680,
+        "y": 260,
+        "wires": [
+            [
+                "1f9c47d739597646"
+            ]
+        ]
+    },
+    {
+        "id": "d9bbe0ade06f1f17",
+        "type": "debug",
+        "z": "e0350d6325aa2e2c",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 740,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "9bd255ccb9ee080a",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-node-mysql": "3.0.0"
+        }
+    }
+]
